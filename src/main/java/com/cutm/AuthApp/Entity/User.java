@@ -2,6 +2,8 @@ package com.cutm.AuthApp.Entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.Instant;
 import java.util.HashSet;
@@ -33,11 +35,12 @@ public class User {
 
     private boolean isEnabled;
 
-    @Builder.Default
-    private Instant createdAt = Instant.now();
+    @CreationTimestamp
+    @Column(updatable = false)
+    private Instant createdAt;
 
-    @Builder.Default
-    private Instant updatedAt = Instant.now();
+    @UpdateTimestamp
+    private Instant updatedAt;
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
@@ -54,17 +57,17 @@ public class User {
     private Set<Role> roles = new HashSet<>();
 
     // Runs once right before inserting into the database
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = Instant.now();
-        this.updatedAt = Instant.now();
-    }
-
-    // Runs every time the entity is updated in the database
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = Instant.now();
-    }
+//    @PrePersist
+//    protected void onCreate() {
+//        this.createdAt = Instant.now();
+//        this.updatedAt = Instant.now();
+//    }
+//
+//    // Runs every time the entity is updated in the database
+//    @PreUpdate
+//    protected void onUpdate() {
+//        this.updatedAt = Instant.now();
+//    }
 }
 
 
@@ -73,3 +76,6 @@ public class User {
 "If I do not explicitly set this field while using the builder, please use the default value I wrote right here."
 Which fields need it?
 You only need it on fields where you have used an equals sign (=) to assign a default starting value.*/
+
+/* Hibernate takes over, sees the null timestamps,
+ and injects the exact database server time right before running the SQL INSERT command.*/

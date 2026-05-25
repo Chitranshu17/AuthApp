@@ -24,7 +24,7 @@ public class UserDTO {
     private String password;
 
     private String image;
-    private boolean isEnabled;
+    private boolean isEnabled = true;
 
     @Builder.Default
     private Instant createdAt = Instant.now();
