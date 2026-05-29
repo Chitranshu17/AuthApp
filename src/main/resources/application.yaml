@@ -2,18 +2,50 @@ spring:
   application:
     name: AuthApp
 
+  profiles:
+    active: dev
+
   # ───── Database (MySQL) ─────
   datasource:
     url: jdbc:mysql://localhost:3306/auth_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: root
-    password:         # 👈 change this
+    password: Chinu@345
     driver-class-name: com.mysql.cj.jdbc.Driver
+
+  #    hikari:
+  #      # WHAT: Names the connection pool.
+  #      # WHY: Makes it easy to identify this specific pool in your console logs and metrics.
+  #      pool-name: AuthAppPool
+  #
+  #      # WHAT: The maximum number of simultaneous connections to the database.
+  #      # WHY: Prevents your application from opening too many connections and crashing the database.
+  #      maximum-pool-size: 5
+  #
+  #      # WHAT: Max time (in ms) to wait for an available connection from the pool.
+  #      # WHY: Prevents user requests from hanging indefinitely if all 5 connections are currently busy.
+  #      connection-timeout: 30000
+  #
+  #      # WHAT: Max time (in ms) a connection can sit unused in the pool.
+  #      # WHY: Allows Hikari to close inactive connections and free up resources when traffic is low.
+  #      idle-timeout: 600000
+  #
+  #      # WHAT: The absolute maximum age (in ms) of a connection before it is forcefully retired.
+  #      # WHY: Prevents "connection dropped" errors caused by databases or firewalls killing old connections.
+  #      max-lifetime: 1800000
+  #
+  #      # WHAT: Max time (in ms) a connection can be checked out before triggering a warning log.
+  #      # WHY: Helps you track down memory leaks where your code forgot to close a connection.
+  #      leak-detection-timeout: 2000
+  #
+  #      # WHAT: A simple SQL query used to check if a connection is still alive.
+  #      # WHY: Ensures Hikari doesn't hand a dead/broken connection to your application.
+  #      connection-test-query: SELECT 1
 
   # ───── JPA / Hibernate ─────
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
@@ -24,6 +56,6 @@ server:
   port: 8080
 
 # ───── JWT ─────
-jwt:
-  secret: 5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437
-  expiration: 86400000       # 24 hours in milliseconds
+#jwt:
+#  secret: 5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437
+#  expiration: 86400000       # 24 hours in milliseconds

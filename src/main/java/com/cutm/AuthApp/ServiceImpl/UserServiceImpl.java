@@ -56,13 +56,18 @@ public class UserServiceImpl implements UserService {
         UUID parsedUUID = parseUUID(userId);
         User existingUser = repository.findById(parsedUUID)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with given id"));
-        if (userDTO.getName() != null) existingUser.setName(userDTO.getName());
-        if (userDTO.getImage() != null) existingUser.setImage(userDTO.getImage());
-        if (userDTO.getProvider() != null) existingUser.setProvider(userDTO.getProvider());
+        if (userDTO.getName() != null) {
+            existingUser.setName(userDTO.getName());
+        }
+        if (userDTO.getImage() != null) {
+            existingUser.setImage(userDTO.getImage());
+        }
+        if (userDTO.getProvider() != null) {
+            existingUser.setProvider(userDTO.getProvider());
+        }
         //Todo change password Updation logic
         if (userDTO.getPassword() != null) existingUser.setPassword(userDTO.getPassword());
 
-        existingUser.setProvider(userDTO.getProvider());
 
         User updatedUser = repository.save(existingUser);
 

@@ -1,0 +1,19 @@
+server:
+  port: 8080
+
+security:
+  jwt:
+    # No fallback here. If JWT_SECRET is missing, the app SHOULD crash for safety.
+    secret: ${JWT_SECRET}
+
+    # These will use the env variable if it exists, otherwise they fall back to the defaults
+    issuer: ${JWT_ISSUER:cutm-auth-app}
+    access-ttl-seconds: ${JWT_ACCESS_TTL:3600}
+    refresh-ttl-seconds: ${JWT_REFRESH_TTL:86400}
+
+    refresh-token-cookie-name: refresh_token
+
+    # You can even do this for booleans! (Change to true in production via env var)
+    cookie-secure: ${JWT_COOKIE_SECURE:false}
+    cookie-http-only: true
+    cookie-same-site: Lax
