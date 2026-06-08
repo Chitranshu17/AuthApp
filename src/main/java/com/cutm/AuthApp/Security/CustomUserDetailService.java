@@ -1,8 +1,8 @@
 package com.cutm.AuthApp.Security;
 
-import com.cutm.AuthApp.Exception.ResourceNotFoundException;
 import com.cutm.AuthApp.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -15,7 +15,7 @@ public class CustomUserDetailService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByEmail(username).orElseThrow(() -> new ResourceNotFoundException("Invalid Email or Password"));
+        return userRepository.findByEmail(username).orElseThrow(() -> new BadCredentialsException("Invalid Email or Password"));
 
     }
 }
