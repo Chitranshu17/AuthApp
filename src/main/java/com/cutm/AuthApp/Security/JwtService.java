@@ -64,6 +64,8 @@ public class JwtService {
                 // Set the creation time
                 .issuedAt(Date.from(now))
 
+                .issuer(issuer)
+
                 // Set expiration
                 .expiration(Date.from(now.plusSeconds(accessTtlSeconds)))
 
@@ -92,6 +94,8 @@ public class JwtService {
                 // Set the creation time
                 .issuedAt(Date.from(now))
 
+                .issuer(issuer)
+
                 // Set expiration (using the longer refresh TTL from your YAML)
                 .expiration(Date.from(now.plusSeconds(refreshTtlSeconds)))
 
@@ -103,14 +107,11 @@ public class JwtService {
     }
 
     public Jws<Claims> parse(String token) {
-        try {
-            return Jwts.parser()
-                    .verifyWith(secretKey)
-                    .build()
-                    .parseSignedClaims(token);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to parse token: " + e.getMessage());
-        }
+        // Let the native exceptions (like ExpiredJwtException) bubble up!
+        return Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token);
     }
 
     public boolean isAccessToken(String token) {

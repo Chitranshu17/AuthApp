@@ -17,3 +17,5 @@ security:
     cookie-secure: ${JWT_COOKIE_SECURE:false}
     cookie-http-only: true
     cookie-same-site: Lax
+    #    cookie-domain: ${JWT_COOKIE_DOMAIN:.cutm.com}
+    cookie-domain: ${JWT_COOKIE_DOMAIN:localhost}
