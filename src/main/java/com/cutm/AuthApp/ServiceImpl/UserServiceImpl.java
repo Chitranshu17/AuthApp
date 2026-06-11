@@ -8,10 +8,12 @@ import com.cutm.AuthApp.Repository.UserRepository;
 import com.cutm.AuthApp.Services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static com.cutm.AuthApp.Helpers.userHelper.parseUUID;
@@ -22,6 +24,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository repository;
     private final ModelMapper mapper;
+    private final PasswordEncoder passwordEncoder; // Injected the encoder!
 
     @Override
     @Transactional
@@ -35,8 +38,9 @@ public class UserServiceImpl implements UserService {
         }
 
         User user = mapper.map(userDTO, User.class);
-        //TODO
-        // Note: Password encoding will be added here later
+
+        // FIXED TODO: We can now encode the password during standard registration!
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         User savedUser = repository.save(user);
         return mapper.map(savedUser, UserDTO.class);
@@ -56,6 +60,7 @@ public class UserServiceImpl implements UserService {
         UUID parsedUUID = parseUUID(userId);
         User existingUser = repository.findById(parsedUUID)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with given id"));
+
         if (userDTO.getName() != null) {
             existingUser.setName(userDTO.getName());
         }
@@ -65,12 +70,13 @@ public class UserServiceImpl implements UserService {
         if (userDTO.getProvider() != null) {
             existingUser.setProvider(userDTO.getProvider());
         }
-        //Todo change password Updation logic
-        if (userDTO.getPassword() != null) existingUser.setPassword(userDTO.getPassword());
 
+        // Encode the new password if they are updating it
+        if (userDTO.getPassword() != null) {
+            existingUser.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        }
 
         User updatedUser = repository.save(existingUser);
-
         return mapper.map(updatedUser, UserDTO.class);
     }
 
@@ -91,7 +97,6 @@ public class UserServiceImpl implements UserService {
         UUID id = parseUUID(userId);
 
         User user = repository.findById(id)
-                // Replaced with ResourceNotFoundException
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with ID: " + userId));
 
         return mapper.map(user, UserDTO.class);
@@ -105,4 +110,28 @@ public class UserServiceImpl implements UserService {
                 .toList();
     }
 
+    @Override
+    public User findOrCreateUser(String email) {
+        // 1. Check if the user already exists in the database
+        Optional<User> existingUser = repository.findByEmail(email); // Fixed variable name
+
+        if (existingUser.isPresent()) {
+            return existingUser.get();
+        }
+
+        // 2. If they do not exist, register them automatically
+        User newUser = new User();
+        newUser.setEmail(email);
+
+        // Extract the part of the email before the '@' symbol to use as a default name
+        String defaultName = email.substring(0, email.indexOf("@"));
+        newUser.setName(defaultName);
+
+        // 3. Handle the Password Requirement
+        String randomPassword = UUID.randomUUID().toString();
+        newUser.setPassword(passwordEncoder.encode(randomPassword));
+
+        // 4. Save and return the brand new user
+        return repository.save(newUser); // Fixed variable name
+    }
 }

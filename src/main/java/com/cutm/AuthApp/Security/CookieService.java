@@ -18,16 +18,14 @@ public class CookieService {
     private final String cookieDomain;
     private final String cookieSameSite;
 
-    // The constructor automatically pulls values from your application.yml on startup
+    // Notice the updated 'spring.security.jwt...' paths below!
     public CookieService(
-            @Value("${security.jwt.refresh-token-cookie-name}") String refreshTokenCookieName,
-            @Value("${security.jwt.cookie-http-only}") boolean cookieHttpOnly,
-            @Value("${security.jwt.cookie-secure}") boolean cookieSecure,
-            // We use your refresh token's TTL as the cookie's Max-Age so they die at the exact same time
-            @Value("${security.jwt.refresh-ttl-seconds}") int cookieMaxAge,
-            // The colon ":" at the end means "if this is missing in the YAML, default to an empty string"
-            @Value("${security.jwt.cookie-domain:}") String cookieDomain,
-            @Value("${security.jwt.cookie-same-site}") String cookieSameSite
+            @Value("${spring.security.jwt.refresh-token-cookie-name}") String refreshTokenCookieName,
+            @Value("${spring.security.jwt.cookie-http-only}") boolean cookieHttpOnly,
+            @Value("${spring.security.jwt.cookie-secure}") boolean cookieSecure,
+            @Value("${spring.security.jwt.refresh-ttl-seconds}") int cookieMaxAge,
+            @Value("${spring.security.jwt.cookie-domain:}") String cookieDomain,
+            @Value("${spring.security.jwt.cookie-same-site}") String cookieSameSite
     ) {
         this.refreshTokenCookieName = refreshTokenCookieName;
         this.cookieHttpOnly = cookieHttpOnly;
@@ -74,8 +72,6 @@ public class CookieService {
             builder.domain(cookieDomain);
         }
 
-          /* The builder.build() packages up all the rules you just wrote.
-         Then, response.addHeader(...) attaches this package to the HTTP response going back to the frontend. */
         ResponseCookie responseCookie = builder.build();
 
         // Attach the "kill command" to the response header

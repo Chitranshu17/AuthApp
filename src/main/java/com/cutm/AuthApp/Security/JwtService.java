@@ -29,10 +29,10 @@ public class JwtService {
     private final String issuer;
 
     public JwtService(
-            @Value("${security.jwt.secret}") String secretKeyString,
-            @Value("${security.jwt.access-ttl-seconds}") long accessTtlSeconds,
-            @Value("${security.jwt.refresh-ttl-seconds}") long refreshTtlSeconds,
-            @Value("${security.jwt.issuer}") String issuer
+            @Value("${spring.security.jwt.secret}") String secretKeyString,
+            @Value("${spring.security.jwt.access-ttl-seconds}") long accessTtlSeconds,
+            @Value("${spring.security.jwt.refresh-ttl-seconds}") long refreshTtlSeconds,
+            @Value("${spring.security.jwt.issuer}") String issuer
     ) {
         // Convert the raw string from YAML into a cryptographic key immediately
         byte[] keyBytes = Decoders.BASE64.decode(secretKeyString);

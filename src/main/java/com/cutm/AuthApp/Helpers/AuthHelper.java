@@ -19,7 +19,8 @@ import java.util.Optional;
 public class AuthHelper {
     private final AuthenticationManager authenticationManager;
 
-    @Value("${security.jwt.refresh-token-cookie-name}")
+    // Notice the updated path below!
+    @Value("${spring.security.jwt.refresh-token-cookie-name}")
     private String refreshTokenCookieName;
 
     public Authentication authenticate(LoginRequest loginRequest) {

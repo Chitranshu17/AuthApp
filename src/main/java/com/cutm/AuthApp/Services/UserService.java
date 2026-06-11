@@ -1,6 +1,7 @@
 package com.cutm.AuthApp.Services;
 
 import com.cutm.AuthApp.DTO.UserDTO;
+import com.cutm.AuthApp.Entity.User;
 
 import java.util.List;
 
@@ -18,4 +19,5 @@ public interface UserService {
     List<UserDTO> getAllUsers();
 
 
+    User findOrCreateUser(String email);
 }
