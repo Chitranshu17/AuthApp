@@ -2,6 +2,9 @@ package com.cutm.AuthApp.Helpers;
 
 import com.cutm.AuthApp.DTO.LoginRequest;
 import com.cutm.AuthApp.DTO.RefreshTokenRequest;
+import com.cutm.AuthApp.Entity.Provider;
+import com.cutm.AuthApp.Entity.User;
+import com.cutm.AuthApp.Repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,14 +21,29 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class AuthHelper {
     private final AuthenticationManager authenticationManager;
+    private final UserRepository userRepository;
 
     // Notice the updated path below!
     @Value("${spring.security.jwt.refresh-token-cookie-name}")
     private String refreshTokenCookieName;
 
     public Authentication authenticate(LoginRequest loginRequest) {
+        // 1. Fetch the user from the database by email BEFORE trying to authenticate
+        User user = userRepository.findByEmail(loginRequest.email())
+                .orElseThrow(() -> new RuntimeException("Invalid email or password"));
+
+        // 2. THE VALIDATION CHECK
+        // If the user's provider is NOT "LOCAL" (meaning it's Google or GitHub)
+        if (user.getProvider() != Provider.LOCAL) {
+            // Format a nice message for the frontend to display
+            String providerName = user.getProvider().name().toLowerCase(); // e.g., "google"
+            providerName = providerName.substring(0, 1).toUpperCase() + providerName.substring(1); // "Google"
+
+            throw new RuntimeException("It looks like you signed up with " + providerName + ". Please use the '" + providerName + "' login button.");
+        }
+
+        // 3. If they are a LOCAL user, proceed with normal password authentication
         try {
-            // Added 'return' to pass the successful authentication object back to the controller
             return authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             loginRequest.email(),

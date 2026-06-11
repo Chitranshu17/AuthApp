@@ -38,7 +38,6 @@ public class SecurityConfig {
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(oAuth2SuccessHandler)
-                        .failureHandler(null)
                 )
 
                 // Add your custom exception handler here, this is for Unauthorized Protected apis
