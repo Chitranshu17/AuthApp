@@ -142,6 +142,39 @@ public class JwtService {
         return (List<String>) c.get("roles");
     }
 
+    ///  Password Reset
+
+    public String generatePasswordResetToken(User user) {
+        Instant now = Instant.now();
+        return Jwts.builder()
+                .subject(user.getEmail())
+                // THE TRICK: Embed the current password hash into the token
+                .claim("pwdHash", user.getPassword())
+                .issuedAt(Date.from(now))
+                // Expires in 15 minutes (900 seconds)
+                .expiration(Date.from(now.plusSeconds(900)))
+                .signWith(secretKey)
+                .compact();
+    }
+
+    public boolean validatePasswordResetToken(String token, User user) {
+        try {
+            // We reuse your modern parse() method.
+            // It automatically checks if the token is expired or tampered with!
+            Claims claims = parse(token).getPayload();
+
+            String tokenEmail = claims.getSubject();
+            String tokenPwdHash = claims.get("pwdHash", String.class);
+
+            // Verify the email matches AND the password hash hasn't changed
+            return tokenEmail.equals(user.getEmail()) && tokenPwdHash.equals(user.getPassword());
+
+        } catch (Exception e) {
+            // If parse() fails (e.g., token is expired) or the logic above fails, it returns false
+            return false;
+        }
+    }
+
 
 }
 

@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -31,6 +32,12 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     private final RefreshTokenRepository refreshTokenRepository;
     private final UserRepository userRepository; // Injected to save the user directly
     private static final Logger logger = LoggerFactory.getLogger(OAuth2SuccessHandler.class);
+
+    @Value("${app.auth.success-redirect}")
+    private String frontEndSuccessUrl;
+
+    @Value("${app.auth.failure-redirect}")
+    private String frontEndFailureUrl;
 
     @Override
     // Fixed the duplicate 'throws IOException' from your snippet

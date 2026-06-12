@@ -14,4 +14,5 @@ public interface AuthService {
     TokenResponse rotateRefreshToken(String oldRefreshTokenString);
 
     void revokeRefreshToken(String token);
+    
 }

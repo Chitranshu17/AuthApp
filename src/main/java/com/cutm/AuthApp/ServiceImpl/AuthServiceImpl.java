@@ -5,8 +5,10 @@ import com.cutm.AuthApp.DTO.UserDTO;
 import com.cutm.AuthApp.Entity.RefreshToken;
 import com.cutm.AuthApp.Entity.User;
 import com.cutm.AuthApp.Repository.RefreshTokenRepository;
+import com.cutm.AuthApp.Repository.UserRepository;
 import com.cutm.AuthApp.Security.JwtService;
 import com.cutm.AuthApp.Services.AuthService;
+import com.cutm.AuthApp.Services.EmailService;
 import com.cutm.AuthApp.Services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
@@ -27,6 +29,8 @@ public class AuthServiceImpl implements AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtService jwtService;
     private final ModelMapper modelMapper;
+    private final EmailService emailService;
+    private final UserRepository userRepository;
 
     @Override
     public UserDTO registerUser(UserDTO userDTO) {
@@ -127,6 +131,7 @@ public class AuthServiceImpl implements AuthService {
             // means our goal is already achieved! We just ignore the error and let them log out.
         }
     }
+
 }
 
 /* The "Phone Call" Rule (Fixing the Crash)

@@ -1,16 +1,13 @@
 package com.cutm.AuthApp.Controller;
 
-import com.cutm.AuthApp.DTO.LoginRequest;
-import com.cutm.AuthApp.DTO.RefreshTokenRequest;
-import com.cutm.AuthApp.DTO.TokenResponse;
-import com.cutm.AuthApp.DTO.UserDTO;
+import com.cutm.AuthApp.DTO.*;
 import com.cutm.AuthApp.Entity.RefreshToken;
 import com.cutm.AuthApp.Entity.User;
 import com.cutm.AuthApp.Helpers.AuthHelper;
-import com.cutm.AuthApp.Repository.RefreshTokenRepository;
 import com.cutm.AuthApp.Security.CookieService;
 import com.cutm.AuthApp.Security.JwtService;
 import com.cutm.AuthApp.Services.AuthService;
+import com.cutm.AuthApp.Services.PasswordRecoveryService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -37,7 +34,7 @@ public class AuthController {
     private final AuthHelper authHelper;
     private final JwtService jwtService;
     private final ModelMapper modelMapper;
-    private final RefreshTokenRepository refreshTokenRepository;
+    private final PasswordRecoveryService passwordRecoveryService;
     private final CookieService cookieService;
 
     @PostMapping("/login")
@@ -148,5 +145,18 @@ public class AuthController {
     public ResponseEntity<UserDTO> registerUser(@RequestBody UserDTO userDTO) {
         UserDTO createdUser = authService.registerUser(userDTO);
         return ResponseEntity.ok(createdUser);
+    }
+
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<String> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        passwordRecoveryService.processForgotPassword(request.email());
+        return ResponseEntity.ok("If an account with that email exists, a password reset link has been sent.");
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        passwordRecoveryService.processResetPassword(request.token(), request.newPassword());
+        return ResponseEntity.ok("Password successfully reset. You can now log in with your new password.");
     }
 }

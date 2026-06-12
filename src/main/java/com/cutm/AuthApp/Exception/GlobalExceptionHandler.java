@@ -10,14 +10,19 @@ import org.springframework.security.authentication.CredentialsExpiredException;
 import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.sql.Timestamp;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    // Auth exceptions (401)
     @ExceptionHandler({
             UsernameNotFoundException.class,
             BadCredentialsException.class,
@@ -26,19 +31,18 @@ public class GlobalExceptionHandler {
             DisabledException.class
     })
     public ResponseEntity<ApiError> handleAuthException(Exception e, HttpServletRequest request) {
-        // Utilizing new static factory method!
         ApiError apiError = ApiError.of(
                 HttpStatus.UNAUTHORIZED,
                 e.getMessage(),
                 request.getRequestURI()
         );
-
         return new ResponseEntity<>(apiError, HttpStatus.UNAUTHORIZED);
     }
 
-    // 1. Handles missing users (404)
+    // Missing resource (404)
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException ex) {
+    public ResponseEntity<ErrorResponse> handleResourceNotFoundException(
+            ResourceNotFoundException ex) {
         ErrorResponse response = new ErrorResponse(
                 ex.getMessage(),
                 HttpStatus.NOT_FOUND.value(),
@@ -48,9 +52,10 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
-    // 2. Handles duplicate emails (409)
+    // Duplicate resource (409)
     @ExceptionHandler(ResourceAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponse> handleResourceAlreadyExistsException(ResourceAlreadyExistsException ex) {
+    public ResponseEntity<ErrorResponse> handleResourceAlreadyExistsException(
+            ResourceAlreadyExistsException ex) {
         ErrorResponse response = new ErrorResponse(
                 ex.getMessage(),
                 HttpStatus.CONFLICT.value(),
@@ -60,15 +65,33 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.CONFLICT);
     }
 
-    // 3. Handles bad input like missing emails or invalid UUIDs (400)
+    // ✅ Keep only THIS ONE for IllegalArgumentException — has request context
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex) {
-        ErrorResponse response = new ErrorResponse(
+    public ResponseEntity<ApiError> handleIllegalArgumentException(
+            IllegalArgumentException ex,
+            HttpServletRequest request) {
+        ApiError apiError = ApiError.of(
+                HttpStatus.BAD_REQUEST,
                 ex.getMessage(),
-                HttpStatus.BAD_REQUEST.value(),
-                HttpStatus.BAD_REQUEST.getReasonPhrase(),
-                new Timestamp(System.currentTimeMillis())
+                request.getRequestURI()
         );
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
+    }
+
+    // Validation failures (400)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ApiError> handleValidationExceptions(
+            MethodArgumentNotValidException ex,
+            HttpServletRequest request) {
+        Map<String, String> errors = new HashMap<>();
+        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+            errors.put(error.getField(), error.getDefaultMessage());
+        }
+        ApiError apiError = ApiError.of(
+                HttpStatus.BAD_REQUEST,
+                errors.toString(),
+                request.getRequestURI()
+        );
+        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
 }

@@ -15,6 +15,11 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
@@ -33,7 +38,7 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/refresh", "/api/auth/logout", "/error").permitAll()
+                        .requestMatchers(AppConstants.AUTH_PUBLIC_URLS).permitAll()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
@@ -60,6 +65,51 @@ public class SecurityConfig {
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+
+        ///  TODO setup
+        // ✅ Use environment variable in production — never hardcode
+        configuration.setAllowedOrigins(List.of(
+                "http://localhost:3000",           // dev
+                "https://yourdomain.com"           // prod
+        ));
+
+        // ✅ Explicit methods only — never add "TRACE" or "CONNECT"
+        configuration.setAllowedMethods(List.of(
+                "GET", "POST", "PUT", "DELETE", "OPTIONS"
+        ));
+
+        // ✅ Explicitly list only what your app actually needs
+        configuration.setAllowedHeaders(List.of(
+                "Authorization",        // JWT Bearer token
+                "Content-Type",         // application/json
+                "X-Requested-With",     // AJAX requests
+                "Accept",               // Response format
+                "Origin",               // CORS origin header
+                "Access-Control-Request-Method",   // Preflight
+                "Access-Control-Request-Headers"   // Preflight
+        ));
+
+        // ✅ Expose headers the frontend JS needs to READ
+        configuration.setExposedHeaders(List.of(
+                "Authorization",
+                "Access-Control-Allow-Origin",
+                "Access-Control-Allow-Credentials"
+        ));
+
+        // ✅ Required for HTTP-Only cookies (refresh tokens)
+        configuration.setAllowCredentials(true);
+
+        // ✅ Cache preflight response for 1 hour — reduces OPTIONS requests
+        configuration.setMaxAge(3600L);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
 
